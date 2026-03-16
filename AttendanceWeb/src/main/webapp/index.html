@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>勤怠登録・編集・削除</title>
+<style>
+body {
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	background-color: #f5f7fa;
+	margin: 0;
+	padding: 20px;
+	color: #333;
+}
+
+.container {
+	max-width: 1200px;
+	margin: 0 auto;
+	background: #ffffff;
+	border-radius: 12px;
+	box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+	padding: 40px;
+}
+
+h1 {
+	text-align: center;
+	color: #2c3e50;
+	background-color: #1abd36;
+	font-size: 28px;
+	margin-bottom: 20px;
+	padding-bottom: 15px;
+}
+
+.current-time {
+	text-align: center;
+	font-size: 16px;
+	color: #555;
+	margin-bottom: 30px;
+	font-weight: bold;
+}
+
+.auth-header {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 30px;
+	align-items: end;
+	padding-bottom: 20px;
+	margin-bottom: 30px;
+}
+
+.form-group {
+	margin-bottom: 25px;
+}
+
+.form-error {
+	color: #e74c3c;
+	font-size: 14px;
+	margin-bottom: 5px;
+	min-height: 18px;
+	font-weight: bold;
+}
+
+.weekday-message {
+	font-size: 14px;
+	margin-top: 5px;
+	min-height: 20px;
+	font-weight: bold;
+	color: #1565c0;
+}
+
+.mode-instruction {
+	color: #c0392b;
+	font-weight: bold;
+	text-align: center;
+	margin-bottom: 10px;
+}
+
+.reset-instruction {
+	color: #c0392b;
+	font-weight: bold;
+	text-align: center;
+	margin-top: 20px;
+	margin-bottom: 20px;
+}
+
+label {
+	display: block;
+	margin-bottom: 8px;
+	font-weight: bold;
+	color: #2c3e50;
+	font-size: 16px;
+}
+
+input[type="text"], input[type="date"], select, textarea {
+	width: 100%;
+	padding: 12px 15px;
+	border: 1px solid #bdc3c7;
+	border-radius: 8px;
+	font-size: 16px;
+	box-sizing: border-box;
+	transition: all 0.3s;
+}
+
+input[readonly] {
+  background-color: #a8e063;
+  color: #006400;
+  font-weight: bold;
+  cursor: default;
+}
+
+input[readonly]:focus,
+input[readonly]:active {
+  border-color: #bdc3c7 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+input:focus:not([readonly]),
+select:focus:not([readonly]),
+textarea:focus:not([readonly]) {
+  border-color: #3498db;
+  outline: none;
+  box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
+}
+
+input:disabled, select:disabled, textarea:disabled {
+	background-color: #ecf0f1;
+	color: #95a5a6;
+	cursor: not-allowed;
+}
+
+input:focus, select:focus, textarea:focus {
+	border-color: #3498db;
+	outline: none;
+	box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
+}
+
+input.saturday, input.sunday-holiday {
+	background-color: #e3f2fd !important;
+	color: #1565c0 !important;
+	font-weight: bold;
+	border: 2px solid #1565c0 !important;
+}
+
+input.error, select.error, textarea.error {
+	background-color: #ffebee !important;
+	color: #c62828 !important;
+	border: 2px solid #c62828 !important;
+}
+
+.time-inputs {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 30px;
+}
+
+.buttons {
+	display: flex;
+	justify-content: center;
+	align-items: flex-start;
+	gap: 120px;
+	margin-top: 30px;
+	margin-bottom: 20px;
+	flex-wrap: wrap;
+}
+
+.execute-btn, .reset-btn {
+	padding: 14px 40px;
+	font-size: 18px;
+	font-weight: bold;
+	border: none;
+	border-radius: 8px;
+	cursor: pointer;
+	min-width: 160px;
+	box-sizing: border-box;
+}
+
+.reset-group {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 13px;
+}
+
+.reset-instruction {
+	color: #c0392b;
+	font-weight: bold;
+	text-align: center;
+	font-size: 14px;
+	margin: 0;
+	white-space: nowrap;
+}
+
+.execute-btn {
+	margin-top: 34px;
+	background: #3498db;
+	color: white;
+}
+
+button {
+	padding: 14px 40px;
+	margin: 0 15px;
+	font-size: 18px;
+	font-weight: bold;
+	border: none;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: all 0.3s;
+}
+
+button:disabled {
+	background: #bdc3c7;
+	cursor: not-allowed;
+	transform: none;
+}
+
+.execute-btn:hover:not(:disabled) {
+	background: #2980b9;
+	transform: translateY(-2px);
+	box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
+}
+
+.reset-btn {
+	background: #e74c3c;
+	color: white;
+}
+
+.reset-btn:hover:not(:disabled) {
+	background: #c0392b;
+	transform: translateY(-2px);
+	box-shadow: 0 6px 15px rgba(231, 76, 60, 0.4);
+}
+
+.message {
+	padding: 15px 20px;
+	margin: 20px 0;
+	border-radius: 8px;
+	text-align: center;
+	font-weight: bold;
+	font-size: 16px;
+}
+
+.success {
+	background: #d5f5e3;
+	color: #27ae60;
+	border: 1px solid #a3e4d7;
+}
+
+.error {
+	background: #fadbd8;
+	color: #e74c3c;
+	border: 1px solid #f5b7b1;
+}
+
+.notice-box {
+	background-color: #ffffff;
+	color: #000000;
+	border: 2px solid #000000;
+	border-radius: 8px;
+	padding: 15px;
+	margin: 20px 0 30px 0;
+	font-size: 15px;
+	line-height: 1.6;
+}
+
+.notice-box strong {
+	color: #c82333;
+	font-weight: bold;
+}
+
+.modal {
+	display: none;
+	position: fixed;
+	z-index: 1000;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.7);
+	justify-content: center;
+	align-items: center;
+}
+
+.modal-content {
+	background-color: #ffffff;
+	padding: 30px 40px;
+	border-radius: 12px;
+	width: 90%;
+	max-width: 550px;
+	text-align: center;
+	box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
+	animation: modalFadeIn 0.3s ease-out;
+}
+
+keyframes modalFadeIn {from { opacity:0;
+	transform: scale(0.9);
+}
+
+to {
+	opacity: 1;
+	transform: scale(1);
+}
+
+}
+.modal h2 {
+	color: #2c3e50;
+	margin-bottom: 20px;
+}
+
+.modal p {
+	font-size: 16px;
+	color: #34495e;
+	margin-bottom: 30px;
+	line-height: 1.6;
+}
+
+.modal-summary {
+	text-align: left;
+	margin: 0 auto 30px;
+	max-width: 400px;
+	padding: 15px;
+	background: #f8f9fa;
+	border-radius: 8px;
+	border: 1px solid #dee2e6;
+	overflow: hidden;
+}
+
+.modal-summary dl {
+	margin: 0;
+}
+
+.modal-summary dt {
+	font-weight: bold;
+	color: #495057;
+	margin-top: 10px;
+}
+
+.modal-summary dd {
+	margin: 5px 0 0 20px;
+	color: #212529;
+	overflow-wrap: break-word;
+	white-space: pre-wrap;
+}
+
+#confirm-note, #delete-confirm-note {
+	max-height: 120px;
+	overflow-y: auto;
+	word-break: break-all;
+	overflow-wrap: break-word;
+	white-space: pre-wrap;
+	padding: 5px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	background: #fafafa;
+	text-align: left;
+}
+
+#edit-confirm-note {
+	overflow-y: auto;
+	white-space: pre-wrap;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	background: #fafafa;
+	text-align: left;
+}
+
+.modal-summary .employee-name {
+	color: #e74c3c;
+	font-weight: bold;
+	font-size: 1.2em;
+}
+
+.modal-summary .not-registered {
+	color: #757575;
+	font-style: italic;
+}
+
+.modal-buttons {
+	display: flex;
+	justify-content: center;
+	gap: 30px;
+	flex-direction: row-reverse;
+}
+
+.modal-buttons button {
+	margin: 0;
+	padding: 12px 30px;
+	font-size: 16px;
+	font-weight: bold;
+	border: none;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: all 0.3s;
+}
+
+.modal-buttons .confirm-register {
+	background: #3498db;
+	color: white;
+}
+
+.modal-buttons .confirm-register:hover {
+	background: #2980b9;
+}
+
+.modal-buttons .confirm-edit {
+	background: #f39c12;
+	color: white;
+}
+
+.modal-buttons .confirm-edit:hover {
+	background: #e67e22;
+}
+
+.modal-buttons .confirm-delete {
+	background: #e74c3c;
+	color: white;
+}
+
+.modal-buttons .confirm-delete:hover {
+	background: #c0392b;
+}
+
+.cancel-btn {
+	background: #95a5a6;
+	color: white;
+}
+
+.cancel-btn:hover {
+	background: #7f8c8d;
+}
+
+@media ( max-width : 600px) {
+	.auth-header {
+		grid-template-columns: 1fr;
+	}
+	.time-inputs {
+		grid-template-columns: 1fr;
+	}
+	.buttons button {
+		display: block;
+		width: 100%;
+		margin: 10px 0;
+	}
+	.modal-buttons {
+		gap: 15px;
+		flex-direction: column-reverse;
+	}
+	.modal-summary {
+		max-width: 100%;
+	}
+}
+
+.mode-buttons {
+	display: flex;
+	justify-content: center;
+	gap: 15px;
+	margin: 10px 0 30px 0;
+}
+
+.mode-btn {
+	padding: 10px 20px;
+	font-size: 16px;
+	font-weight: bold;
+	border: none;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: all 0.3s;
+}
+
+.mode-btn:disabled {
+	background: #bdc3c7;
+	cursor: not-allowed;
+}
+
+.mode-register {
+	background: #3498db;
+	color: white;
+}
+
+.mode-register:hover:not(:disabled) {
+	background: #2980b9;
+}
+
+.mode-edit {
+	background: #f39c12;
+	color: white;
+}
+
+.mode-edit:hover:not(:disabled) {
+	background: #e67e22;
+}
+
+.mode-delete {
+	background: #e74c3c;
+	color: white;
+}
+
+.mode-delete:hover:not(:disabled) {
+	background: #c0392b;
+}
+
+.edited {
+	color: #c0392b;
+	font-weight: bold;
+}
+</style>
+</head>
+<body>
+	<div class="container">
+		<h1>勤怠登録・編集・削除</h1>
+		<div class="current-time">
+			画面表示した時刻: <span id="current-time">読み込み中...</span>
+		</div>
+		<div id="message-area"></div>
+		<div class="auth-header">
+			<div class="form-group">
+				<label for="employee_id">社員コード</label> <input type="text"
+					id="employee_id" maxlength="5" placeholder="5桁の数字を入力"
+					inputmode="numeric" pattern="[0-9]*" autofocus>
+			</div>
+			<div class="form-group">
+				<label for="employee_name">社員名</label> <input type="text"
+					id="employee_name" readonly placeholder="認証後に表示されます">
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="form-error" id="error-work_date"></div>
+			<label for="work_date">年月日(土日選択時に青になります)</label>
+			<input type="date" id="work_date" disabled>
+			<div id="weekday-message" class="weekday-message"></div>
+			<div class="mode-instruction">
+				年月日を入力後、モードを選択してください。(選択したモード以外非表示)</div>
+		</div>
+		<div style="text-align: center; margin-bottom: 10px;">
+			<strong>モード選択</strong>
+		</div>
+		<div class="mode-buttons">
+			<button class="mode-btn mode-register" id="mode-register" disabled>登録</button>
+			<button class="mode-btn mode-edit" id="mode-edit" disabled>編集</button>
+			<button class="mode-btn mode-delete" id="mode-delete" disabled>削除</button>
+		</div>
+		<div class="notice-box">
+			<strong>勤怠削除時、以下の項目が入力されていても無視する。</strong><br> 
+			・開始時刻 ・終了時刻 ・勤怠ステータス ・備考<br>
+			<br> 
+			開始時刻・終了時刻入力例：「09:00」(半角数字のみ入力可能、コロン自動挿入)<br>
+			<span style="color: #c82333; font-weight: bold;">登録・編集・削除可能な期間：前月1日～当月末日（今日基準）</span>
+		</div>
+		<div class="time-inputs">
+			<div class="form-group">
+				<div class="form-error" id="error-start_time"></div>
+				<label for="start_time">開始時刻</label> <input type="text"
+					id="start_time" placeholder="HH:MM" disabled>
+			</div>
+			<div class="form-group">
+				<div class="form-error" id="error-end_time"></div>
+				<label for="end_time">終了時刻</label> <input type="text" id="end_time"
+					placeholder="HH:MM" disabled>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="form-error" id="error-status"></div>
+			<label for="status">勤怠ステータス</label> <select id="status" disabled>
+				<option value="0">読み込み中...</option>
+			</select>
+		</div>
+		<div class="form-group">
+			<div class="form-error" id="error-note"></div>
+			<label for="note">備考</label>
+			<textarea id="note" rows="4" maxlength="100" placeholder="最大100文字"
+				disabled></textarea>
+		</div>
+		<div class="buttons">
+			<button class="execute-btn" id="execute-btn" disabled>実行</button>
+			<div class="reset-group">
+				<div class="reset-instruction">選択/入力ミスした際は、以下のボタンを押下してください。</div>
+				<button class="reset-btn" id="reset-btn" disabled>初期化</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- 登録確認ポップアップ -->
+	<div id="register-modal" class="modal">
+		<div class="modal-content">
+			<h2>登録確認</h2>
+			<div class="modal-summary">
+				<dl>
+					<dt>社員名</dt>
+					<dd id="confirm-employee_name" class="employee-name"></dd>
+					<dt>年月日</dt>
+					<dd id="confirm-work_date"></dd>
+					<dt>開始時刻</dt>
+					<dd id="confirm-start_time"></dd>
+					<dt>終了時刻</dt>
+					<dd id="confirm-end_time"></dd>
+					<dt>勤怠ステータス</dt>
+					<dd id="confirm-status"></dd>
+					<dt>備考</dt>
+					<dd id="confirm-note"></dd>
+				</dl>
+			</div>
+			<p>上記の内容で登録しますか？</p>
+			<div class="modal-buttons">
+				<button class="cancel-btn" id="register-cancel">キャンセル</button>
+				<button class="confirm-register" id="register-confirm">登録</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- 編集確認ポップアップ -->
+	<div id="edit-modal" class="modal">
+		<div class="modal-content">
+			<h2>編集確認</h2>
+			<div class="modal-summary">
+				<dl>
+					<dt>社員名</dt>
+					<dd id="edit-confirm-employee_name" class="employee-name"></dd>
+					<dt>年月日</dt>
+					<dd id="edit-confirm-work_date"></dd>
+					<dt>開始時刻</dt>
+					<dd id="edit-confirm-start_time">
+						<span id="edit-old-start_time"></span> → <span
+							id="edit-new-start_time" class="edited"></span>
+					</dd>
+					<dt>終了時刻</dt>
+					<dd id="edit-confirm-end_time">
+						<span id="edit-old-end_time"></span> → <span
+							id="edit-new-end_time" class="edited"></span>
+					</dd>
+					<dt>勤怠ステータス</dt>
+					<dd id="edit-confirm-status">
+						<span id="edit-old-status"></span> → <span id="edit-new-status"
+							class="edited"></span>
+					</dd>
+					<dt>備考</dt>
+					<dd id="edit-confirm-note">
+						<span id="edit-old-note"></span> ↓ <span id="edit-new-note"
+							class="edited"></span>
+					</dd>
+				</dl>
+			</div>
+			<p>上記の内容で更新しますか？</p>
+			<div class="modal-buttons">
+				<button class="cancel-btn" id="edit-cancel">キャンセル</button>
+				<button class="confirm-edit" id="edit-confirm">更新</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- 削除確認ポップアップ -->
+	<div id="delete-modal" class="modal">
+		<div class="modal-content">
+			<h2>削除確認</h2>
+			<div class="modal-summary">
+				<dl>
+					<dt>社員名</dt>
+					<dd id="delete-confirm-employee_name" class="employee-name"></dd>
+					<dt>年月日</dt>
+					<dd id="delete-confirm-work_date"></dd>
+					<dt>開始時刻</dt>
+					<dd id="delete-confirm-start_time" class="not-registered">未登録</dd>
+					<dt>終了時刻</dt>
+					<dd id="delete-confirm-end_time" class="not-registered">未登録</dd>
+					<dt>勤怠ステータス</dt>
+					<dd id="delete-confirm-status" class="not-registered">未登録</dd>
+					<dt>備考</dt>
+					<dd id="delete-confirm-note" class="not-registered">なし</dd>
+				</dl>
+			</div>
+			<p>
+				この日の勤怠データを削除しますか？<br>※削除したデータは復元できません
+			</p>
+			<div class="modal-buttons">
+				<button class="cancel-btn" id="delete-cancel">キャンセル</button>
+				<button class="confirm-delete" id="delete-confirm">削除</button>
+			</div>
+		</div>
+	</div>
+
+	<script>
+    let messages = {};
+    let authenticated = false;
+    let employeeId = '';
+    let currentMode = '';
+    let oldData = {};
+
+    fetch('./message.properties')
+      .then(response => response.text())
+      .then(text => {
+        text.split('\n').forEach(line => {
+          line = line.trim();
+          if (line && !line.startsWith('#') && line.includes('=')) {
+            const [key, value] = line.split('=', 2);
+            messages[key.trim()] = value.trim();
+          }
+        });
+        initializeApp();
+      })
+      .catch(err => console.error('message.properties 読み込み失敗:', err));
+
+    const employeeIdInput = document.getElementById('employee_id');
+    const employeeNameInput = document.getElementById('employee_name');
+    const workDateInput = document.getElementById('work_date');
+    const startTimeInput = document.getElementById('start_time');
+    const endTimeInput = document.getElementById('end_time');
+    const statusSelect = document.getElementById('status');
+    const noteTextarea = document.getElementById('note');
+    const executeBtn = document.getElementById('execute-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const modeRegisterBtn = document.getElementById('mode-register');
+    const modeEditBtn = document.getElementById('mode-edit');
+    const modeDeleteBtn = document.getElementById('mode-delete');
+
+    const errorElements = {
+      work_date: document.getElementById('error-work_date'),
+      start_time: document.getElementById('error-start_time'),
+      end_time: document.getElementById('error-end_time'),
+      status: document.getElementById('error-status'),
+      note: document.getElementById('error-note')
+    };
+
+    const weekdayMessage = document.getElementById('weekday-message');
+
+    employeeIdInput.addEventListener('input', function() {
+      this.value = this.value.replace(/[^0-9]/g, '');
+    });
+
+    function restrictAndAutoColon(input) {
+      input.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/[^0-9]/g, '');
+        if (value.length > 4) value = value.slice(0, 4);
+        if (value.length >= 2) value = value.slice(0, 2) + ':' + value.slice(2);
+        e.target.value = value;
+        e.target.classList.remove('error');
+      });
+      input.addEventListener('blur', function() {
+        const value = this.value.trim();
+        if (value !== '' && !/^[0-2][0-9]:[0-5][0-9]$/.test(value)) {
+          this.classList.add('error');
+        } else {
+          this.classList.remove('error');
+        }
+      });
+    }
+
+    restrictAndAutoColon(startTimeInput);
+    restrictAndAutoColon(endTimeInput);
+
+    function updateCurrentTime() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('current-time').textContent = `${year}/${month}/${day} ${hours}:${minutes}`;
+    }
+
+    function clearAllErrors() {
+      Object.values(errorElements).forEach(el => el.textContent = '');
+      document.getElementById('message-area').innerHTML = '';
+      workDateInput.classList.remove('error', 'saturday', 'sunday-holiday');
+      startTimeInput.classList.remove('error');
+      endTimeInput.classList.remove('error');
+      statusSelect.classList.remove('error');
+      noteTextarea.classList.remove('error');
+      weekdayMessage.textContent = '';
+      weekdayMessage.className = 'weekday-message';
+    }
+
+    function showFieldError(field, key) {
+      const msg = messages[key] || `エラー（${key}）`;
+      if (errorElements[field]) errorElements[field].textContent = msg;
+      if (field === 'work_date') workDateInput.classList.add('error');
+      if (field === 'start_time') startTimeInput.classList.add('error');
+      if (field === 'end_time') endTimeInput.classList.add('error');
+      if (field === 'status') statusSelect.classList.add('error');
+      if (field === 'note') noteTextarea.classList.add('error');
+    }
+
+    function showGlobalMessage(type, key) {
+      const msg = messages[key] || key;  
+      const area = document.getElementById('message-area');
+      area.innerHTML = `<div class="message ${type}">${msg}</div>`;
+      if (!messages[key]) {
+        console.warn(`[WARN] メッセージキー "${key}" の値が見つかりません`);
+      }
+    }
+
+    function isWithinAllowedPeriod(dateStr) {
+      if (!dateStr) return false;
+      const [year, month, day] = dateStr.split('-').map(Number);
+      const selectedDate = new Date(year, month - 1, day, 0, 0, 0);
+      const today = new Date();
+      const currentMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+      const prevMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+      const currentMonthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59);
+      return selectedDate >= prevMonthStart && selectedDate <= currentMonthEnd;
+    }
+
+    function checkDateStyleAndMessage() {
+      const val = workDateInput.value;
+      workDateInput.classList.remove('saturday', 'sunday-holiday', 'error');
+      weekdayMessage.textContent = '';
+      weekdayMessage.className = 'weekday-message';
+      if (!val) return;
+      const date = new Date(val);
+      const day = date.getDay();
+      if (day === 6) {
+        workDateInput.classList.add('saturday');
+        weekdayMessage.textContent = messages.WEEKDAY_SATURDAY || '土曜日が選択されています。';
+      } else if (day === 0) {
+        workDateInput.classList.add('sunday-holiday');
+        weekdayMessage.textContent = messages.WEEKDAY_SUNDAY || '日曜日が選択されています。';
+      }
+    }
+
+    async function authenticate() {
+      const id = employeeIdInput.value.trim();
+      if (id === '' || id.length !== 5 || !/^[0-9]{5}$/.test(id)) {
+        showGlobalMessage('error', 'ERROR_ID_FORMAT');
+        return;
+      }
+      try {
+        const response = await fetch(`attendance?action=auth&employee_id=${id}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        if (data.success) {
+          employeeNameInput.value = data.name;
+          authenticated = true;
+          employeeId = id;
+          employeeIdInput.readOnly = true;
+          workDateInput.disabled = false;
+          modeRegisterBtn.disabled = false;
+          modeEditBtn.disabled = false;
+          modeDeleteBtn.disabled = false;
+          resetBtn.disabled = false;
+          showGlobalMessage('success', 'SUCCESS_AUTH');
+        } else {
+          showGlobalMessage('error', 'ERROR_ID_INVALID');
+        }
+      } catch (e) {
+        console.error('[AUTH] 認証エラー詳細:', e);
+        showGlobalMessage('error', 'ERROR_SERVER');
+      }
+    }
+
+    async function loadStatuses() {
+      try {
+        const response = await fetch('status');
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const statuses = await response.json();
+        statusSelect.innerHTML = '';
+        statuses.forEach(s => {
+          const option = document.createElement('option');
+          option.value = s.id;
+          option.textContent = s.name;
+          statusSelect.appendChild(option);
+        });
+        const defaultStatus = statuses.find(s => s.name === '通常出勤' || s.id === 1);
+        if (defaultStatus) statusSelect.value = defaultStatus.id;
+        else if (statuses.length > 0) statusSelect.value = statuses[0].id;
+      } catch (e) {
+        console.error('[STATUS] ステータス読み込みエラー:', e);
+        showGlobalMessage('error', 'ERROR_SERVER');
+      }
+    }
+	
+    //モードチェック
+    async function handleMode(mode) {
+        currentMode = mode;
+        clearAllErrors();
+
+        if (!workDateInput.value) {
+          showFieldError('work_date', 'ERROR_DATE_EMPTY');
+          showGlobalMessage('error', 'MODE_SELECTION_ERROR'); 
+          return;
+        }
+
+        if (!isWithinAllowedPeriod(workDateInput.value)) {
+          showFieldError('work_date', 'ERROR_PERIOD_OUT_OF_RANGE_REGISTER');
+          showGlobalMessage('error', 'MODE_SELECTION_ERROR'); 
+          return;
+        }
+
+        try {
+          const checkRes = await fetch(`attendance?action=check&employee_id=${employeeId}&date=${workDateInput.value}`);
+          if (!checkRes.ok) throw new Error('check API error');
+          const checkData = await checkRes.json();
+          const exists = checkData.exists === true;
+
+          if (mode === 'register') {
+            if (exists) {
+              showFieldError('work_date', 'ERROR_DATE_EXISTS');
+              showGlobalMessage('error', 'MODE_SELECTION_ERROR'); 
+              return;
+            }
+          } else if (mode === 'edit') {
+            if (!exists) {
+              showFieldError('work_date', 'ERROR_EDIT_DATE_EXISTS');
+              showGlobalMessage('error', 'MODE_SELECTION_ERROR'); 
+              return;
+            }
+          } else if (mode === 'delete') {
+            if (!exists) {
+              showFieldError('work_date', 'ERROR_DELETE_NO_DATA');
+              showGlobalMessage('error', 'MODE_SELECTION_ERROR'); 
+              return;
+            }
+          }
+
+        modeRegisterBtn.style.display = mode === 'register' ? 'inline-block' : 'none';
+        modeEditBtn.style.display = mode === 'edit' ? 'inline-block' : 'none';
+        modeDeleteBtn.style.display = mode === 'delete' ? 'inline-block' : 'none';
+        modeRegisterBtn.disabled = mode !== 'register';
+        modeEditBtn.disabled = mode !== 'edit';
+        modeDeleteBtn.disabled = mode !== 'delete';
+        workDateInput.readOnly = true;
+        executeBtn.disabled = false;
+
+        if (mode === 'register' || mode === 'edit') {
+          startTimeInput.disabled = false;
+          endTimeInput.disabled = false;
+          statusSelect.disabled = false;
+          noteTextarea.disabled = false;
+          loadStatuses();
+        } else if (mode === 'delete') {
+          startTimeInput.disabled = true;
+          endTimeInput.disabled = true;
+          statusSelect.disabled = true;
+          noteTextarea.disabled = true;
+        }
+
+        if (mode === 'edit') {
+          const fetchRes = await fetch(`attendance?action=fetch&employee_id=${employeeId}&date=${workDateInput.value}`);
+          if (!fetchRes.ok) throw new Error('fetch API error');
+          const existingData = await fetchRes.json();
+          oldData.start_time = existingData.start_time || '';
+          oldData.end_time = existingData.end_time || '';
+          oldData.status_id = existingData.status_id || '';
+          oldData.status_name = existingData.status_name || '通常出勤';
+          oldData.note = existingData.note || '';
+          startTimeInput.value = oldData.start_time ? oldData.start_time.substring(0, 5) : '';
+          endTimeInput.value = oldData.end_time ? oldData.end_time.substring(0, 5) : '';
+          statusSelect.value = oldData.status_id || '1';
+          noteTextarea.value = oldData.note;
+        }
+
+        clearAllErrors();
+      } catch (e) {
+        console.error('[handleMode] エラー:', e);
+        showGlobalMessage('error', 'MODE_SELECTION_ERROR');
+      }
+    }
+
+    function handleReset() {
+      clearAllErrors();
+      employeeIdInput.value = '';
+      employeeIdInput.readOnly = false;
+      workDateInput.disabled = true;
+      workDateInput.readOnly = false;
+      startTimeInput.disabled = true;
+      endTimeInput.disabled = true;
+      statusSelect.disabled = true;
+      noteTextarea.disabled = true;
+      executeBtn.disabled = true;
+      resetBtn.disabled = true;
+      modeRegisterBtn.disabled = true;
+      modeEditBtn.disabled = true;
+      modeDeleteBtn.disabled = true;
+      modeRegisterBtn.style.display = 'inline-block';
+      modeEditBtn.style.display = 'inline-block';
+      modeDeleteBtn.style.display = 'inline-block';
+      currentMode = '';
+      oldData = {};
+      employeeNameInput.value = '';
+      authenticated = false;
+      employeeId = '';
+      workDateInput.value = '';
+      startTimeInput.value = '';
+      endTimeInput.value = '';
+      statusSelect.value = '';
+      noteTextarea.value = '';
+      weekdayMessage.textContent = '';
+      workDateInput.classList.remove('saturday', 'sunday-holiday');
+    }
+
+    async function handleExecute() {
+      clearAllErrors();
+      if (currentMode === 'register' || currentMode === 'edit') {
+        const isValid = await validateRegister(currentMode);
+        if (isValid) {
+          if (currentMode === 'register') {
+            document.getElementById('confirm-employee_name').innerHTML = employeeNameInput.value
+              ? `<strong class="employee-name">${employeeNameInput.value}</strong>`
+              : '未認証';
+            document.getElementById('confirm-work_date').textContent = workDateInput.value || '未入力';
+            document.getElementById('confirm-start_time').textContent = startTimeInput.value || '未入力';
+            document.getElementById('confirm-end_time').textContent = endTimeInput.value || '未入力';
+            document.getElementById('confirm-status').textContent = statusSelect.options[statusSelect.selectedIndex]?.text || '通常出勤';
+            document.getElementById('confirm-note').textContent = noteTextarea.value || 'なし';
+            document.getElementById('register-modal').style.display = 'flex';
+          } else if (currentMode === 'edit') {
+            document.getElementById('edit-confirm-employee_name').innerHTML = employeeNameInput.value
+              ? `<strong class="employee-name">${employeeNameInput.value}</strong>`
+              : '未認証';
+            document.getElementById('edit-confirm-work_date').textContent = workDateInput.value || '未入力';
+            document.getElementById('edit-old-start_time').textContent = oldData.start_time ? oldData.start_time.substring(0, 5) : '未入力';
+            document.getElementById('edit-new-start_time').textContent = startTimeInput.value || '未入力';
+            document.getElementById('edit-old-end_time').textContent = oldData.end_time ? oldData.end_time.substring(0, 5) : '未入力';
+            document.getElementById('edit-new-end_time').textContent = endTimeInput.value || '未入力';
+            document.getElementById('edit-old-status').textContent = oldData.status_name || '通常出勤';
+            document.getElementById('edit-new-status').textContent = statusSelect.options[statusSelect.selectedIndex]?.text || '通常出勤';
+            document.getElementById('edit-old-note').textContent = oldData.note || 'なし';
+            document.getElementById('edit-new-note').textContent = noteTextarea.value || 'なし';
+            document.getElementById('edit-modal').style.display = 'flex';
+          }
+        }
+      } else if (currentMode === 'delete') {
+        handleDelete();
+      }
+    }
+	
+    async function validateRegister(mode) {
+      clearAllErrors();
+      let isValid = true;
+
+      if (!workDateInput.value) {
+        showFieldError('work_date', 'ERROR_DATE_EMPTY');
+        isValid = false;
+      } else {
+        if (!isWithinAllowedPeriod(workDateInput.value)) {
+          showFieldError('work_date', mode === 'edit' ? 'ERROR_EDIT_PERIOD_OUT_OF_RANGE' : 'ERROR_PERIOD_OUT_OF_RANGE_REGISTER');
+          isValid = false;
+        } else {
+          try {
+            const checkRes = await fetch(`attendance?action=check&employee_id=${employeeId}&date=${workDateInput.value}`);
+            const checkData = await checkRes.json();
+            const exists = checkData.exists;
+            if (mode === 'register' && exists) {
+              showFieldError('work_date', 'ERROR_DATE_EXISTS');
+              isValid = false;
+            } else if (mode === 'edit' && !exists) {
+              showFieldError('work_date', 'ERROR_EDIT_DATE_EXISTS');
+              isValid = false;
+            }
+          } catch (e) {
+            showGlobalMessage('error', 'ERROR_SERVER');
+            isValid = false;
+          }
+        }
+      }
+
+      const timeRegex = /^([0-2][0-9]):[0-5][0-9]$/;
+      const selectedText = statusSelect.options[statusSelect.selectedIndex]?.text?.trim() || '';
+      const restCodes = ['明け休', '代休', '有給', '社休日', '特別休', '欠勤', '休職'];
+      const isRestStatus = restCodes.includes(selectedText);
+
+      if (!isRestStatus) {
+        if (!startTimeInput.value) {
+          showFieldError('start_time', mode === 'edit' ? 'ERROR_EDIT_TIME_START' : 'ERROR_TIME_START');
+          isValid = false;
+        } else if (!timeRegex.test(startTimeInput.value)) {
+          showFieldError('start_time', mode === 'edit' ? 'ERROR_EDIT_TIME_FORMAT' : 'ERROR_TIME_FORMAT');
+          isValid = false;
+        }
+        if (!endTimeInput.value) {
+          showFieldError('end_time', mode === 'edit' ? 'ERROR_EDIT_TIME_END' : 'ERROR_TIME_END');
+          isValid = false;
+        } else if (!timeRegex.test(endTimeInput.value)) {
+          showFieldError('end_time', mode === 'edit' ? 'ERROR_EDIT_TIME_FORMAT' : 'ERROR_TIME_FORMAT');
+          isValid = false;
+        }
+      } else {
+        const errorMsgKey = mode === 'edit' ? 'ERROR_EDIT_STATUS_REST_TIME' : 'ERROR_STATUS_REST_TIME';
+        if (startTimeInput.value.trim() !== '') {
+          showFieldError('start_time', errorMsgKey);
+          isValid = false;
+        }
+        if (endTimeInput.value.trim() !== '') {
+          showFieldError('end_time', errorMsgKey);
+          isValid = false;
+        }
+      }
+
+      if (noteTextarea.value.length > 100) {
+        showFieldError('note', mode === 'edit' ? 'ERROR_EDIT_NOTE_TOO_LONG' : 'ERROR_NOTE_TOO_LONG');
+        isValid = false;
+      }
+
+      if (!isValid) {
+        const errorKey = mode === 'edit' ? 'ERROR_EDIT_FAILED' : 'ERROR_REGISTER_FAILED';
+        showGlobalMessage('error', errorKey);
+      }
+
+      return isValid;
+    }
+	
+    //登録
+    async function register() {
+      try {
+        const params = new URLSearchParams();
+        params.append('action', 'register');
+        params.append('employee_id', employeeId);
+        params.append('work_date', workDateInput.value);
+        const selectedText = statusSelect.options[statusSelect.selectedIndex]?.text?.trim() || '';
+        const restCodes = ['明け休', '代休', '有給', '社休日', '特別休', '欠勤', '休職'];
+        const isRestStatus = restCodes.includes(selectedText);
+        params.append('start_time', (!isRestStatus && startTimeInput.value) ? startTimeInput.value + ':00' : '');
+        params.append('end_time', (!isRestStatus && endTimeInput.value) ? endTimeInput.value + ':00' : '');
+        params.append('status_id', statusSelect.value);
+        params.append('note', noteTextarea.value);
+        console.log('[REGISTER] 送信パラメータ:', params.toString());
+        const response = await fetch('attendance', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: params
+        });
+        const result = await response.json();
+        console.log('[REGISTER] レスポンス:', result);
+        document.getElementById('register-modal').style.display = 'none';
+        clearAllErrors();
+        if (result.success) {
+          showGlobalMessage('success', 'SUCCESS_REGISTER');
+          resetForm();
+        } else {
+          showGlobalMessage('error', result.message || 'ERROR_SERVER');
+        }
+      } catch (e) {
+        console.error('[REGISTER] エラー:', e);
+        document.getElementById('register-modal').style.display = 'none';
+        clearAllErrors();
+        showGlobalMessage('error', 'ERROR_SERVER');
+      }
+    }
+	
+    //編集
+    async function edit() {
+      try {
+        const params = new URLSearchParams();
+        params.append('action', 'edit');
+        params.append('employee_id', employeeId);
+        params.append('work_date', workDateInput.value);
+        const selectedText = statusSelect.options[statusSelect.selectedIndex]?.text?.trim() || '';
+        const restCodes = ['明け休', '代休', '有給', '社休日', '特別休', '欠勤', '休職'];
+        const isRestStatus = restCodes.includes(selectedText);
+        params.append('start_time', (!isRestStatus && startTimeInput.value) ? startTimeInput.value + ':00' : '');
+        params.append('end_time', (!isRestStatus && endTimeInput.value) ? endTimeInput.value + ':00' : '');
+        params.append('status_id', statusSelect.value);
+        params.append('note', noteTextarea.value);
+        console.log('[EDIT] 送信パラメータ:', params.toString());
+        const response = await fetch('attendance', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: params
+        });
+        const result = await response.json();
+        console.log('[EDIT] レスポンス:', result);
+        document.getElementById('edit-modal').style.display = 'none';
+        clearAllErrors();
+        if (result.success) {
+          showGlobalMessage('success', 'SUCCESS_EDIT');
+          resetForm();
+          workDateInput.disabled = false;
+          modeRegisterBtn.disabled = false;
+          modeEditBtn.disabled = false;
+          modeDeleteBtn.disabled = false;
+        } else {
+          showGlobalMessage('error', result.message || 'ERROR_EDIT_FAILED');
+        }
+      } catch (e) {
+        console.error('[EDIT] エラー:', e);
+        document.getElementById('edit-modal').style.display = 'none';
+        clearAllErrors();
+        showGlobalMessage('error', 'ERROR_SERVER');
+      }
+    }
+	
+    //削除
+    async function handleDelete() {
+      clearAllErrors();
+      if (!workDateInput.value) {
+        showGlobalMessage('error', 'ERROR_DATE_EMPTY');
+        return;
+      }
+      if (!isWithinAllowedPeriod(workDateInput.value)) {
+        showGlobalMessage('error', 'ERROR_PERIOD_OUT_OF_RANGE_DELETE');
+        return;
+      }
+      try {
+        const fetchRes = await fetch(`attendance?action=fetch&employee_id=${employeeId}&date=${workDateInput.value}`);
+        if (!fetchRes.ok) throw new Error(`HTTP error! status: ${fetchRes.status}`);
+        const existingData = await fetchRes.json();
+        const hasData = existingData.start_time?.trim() ||
+                        existingData.end_time?.trim() ||
+                        existingData.status_name?.trim() ||
+                        existingData.note?.trim();
+        if (!hasData) {
+          showGlobalMessage('error', 'ERROR_DELETE_NO_DATA');
+          return;
+        }
+        const formatTime = (timeStr) => {
+          if (!timeStr || typeof timeStr !== 'string') return '未登録';
+          const trimmed = timeStr.trim();
+          return trimmed.length >= 5 ? trimmed.substring(0, 5) : trimmed;
+        };
+        document.getElementById('delete-confirm-employee_name').innerHTML = employeeNameInput.value
+          ? `<strong class="employee-name">${employeeNameInput.value}</strong>`
+          : '未認証';
+        document.getElementById('delete-confirm-work_date').textContent = workDateInput.value || '未入力';
+        document.getElementById('delete-confirm-start_time').textContent = formatTime(existingData.start_time);
+        document.getElementById('delete-confirm-end_time').textContent = formatTime(existingData.end_time);
+        document.getElementById('delete-confirm-status').textContent =
+          existingData.status_name?.trim() || '通常出勤';
+        document.getElementById('delete-confirm-note').textContent =
+          existingData.note?.trim() || 'なし';
+        const startEl = document.getElementById('delete-confirm-start_time');
+        const endEl = document.getElementById('delete-confirm-end_time');
+        const statusEl = document.getElementById('delete-confirm-status');
+        if (!formatTime(existingData.start_time) || formatTime(existingData.start_time) === '未登録') {
+          startEl.classList.add('not-registered');
+        } else {
+          startEl.classList.remove('not-registered');
+        }
+        if (!formatTime(existingData.end_time) || formatTime(existingData.end_time) === '未登録') {
+          endEl.classList.add('not-registered');
+        } else {
+          endEl.classList.remove('not-registered');
+        }
+        if (!existingData.status_name?.trim()) {
+          statusEl.classList.add('not-registered');
+        } else {
+          statusEl.classList.remove('not-registered');
+        }
+        document.getElementById('delete-modal').style.display = 'flex';
+      } catch (e) {
+        console.error('[DELETE_FETCH] エラー:', e);
+        showGlobalMessage('error', 'ERROR_SERVER');
+      }
+    }
+
+    async function deleteRecord() {
+      try {
+        const res = await fetch(`attendance?action=delete&employee_id=${employeeId}&date=${workDateInput.value}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        document.getElementById('delete-modal').style.display = 'none';
+        clearAllErrors();
+        showGlobalMessage('success', 'SUCCESS_DELETE');
+        resetForm();
+      } catch (e) {
+        document.getElementById('delete-modal').style.display = 'none';
+        clearAllErrors();
+        showGlobalMessage('error', 'ERROR_SERVER');
+      }
+    }
+
+    function resetForm() {
+      workDateInput.value = '';
+      workDateInput.readOnly = false;
+      startTimeInput.value = '';
+      endTimeInput.value = '';
+      statusSelect.value = '';
+      noteTextarea.value = '';
+      currentMode = '';
+      oldData = {};
+      executeBtn.disabled = true;
+      startTimeInput.disabled = true;
+      endTimeInput.disabled = true;
+      statusSelect.disabled = true;
+      noteTextarea.disabled = true;
+      modeRegisterBtn.style.display = 'inline-block';
+      modeEditBtn.style.display = 'inline-block';
+      modeDeleteBtn.style.display = 'inline-block';
+      modeRegisterBtn.disabled = false;
+      modeEditBtn.disabled = false;
+      modeDeleteBtn.disabled = false;
+      workDateInput.classList.remove('saturday', 'sunday-holiday');
+      weekdayMessage.textContent = '';
+    }
+
+    function initializeApp() {
+      updateCurrentTime();
+      employeeIdInput.addEventListener('keypress', e => { if (e.key === 'Enter') authenticate(); });
+      employeeIdInput.addEventListener('blur', authenticate);
+      workDateInput.addEventListener('change', checkDateStyleAndMessage);
+      modeRegisterBtn.addEventListener('click', () => handleMode('register'));
+      modeEditBtn.addEventListener('click', () => handleMode('edit'));
+      modeDeleteBtn.addEventListener('click', () => handleMode('delete'));
+      executeBtn.addEventListener('click', handleExecute);
+      resetBtn.addEventListener('click', handleReset);
+      document.getElementById('register-confirm').addEventListener('click', register);
+      document.getElementById('edit-confirm').addEventListener('click', edit);
+      document.getElementById('delete-confirm').addEventListener('click', deleteRecord);
+      document.querySelectorAll('.cancel-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+          clearAllErrors();
+        });
+      });
+      window.addEventListener('click', e => {
+        if (e.target.classList.contains('modal')) {
+          e.target.style.display = 'none';
+          clearAllErrors();
+        }
+      });
+    }
+
+    initializeApp();
+  </script>
+</body>
+</html>
