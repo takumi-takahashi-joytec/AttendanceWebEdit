@@ -102,25 +102,23 @@ input[type="text"], input[type="date"], select, textarea {
 }
 
 input[readonly] {
-  background-color: #a8e063;
-  color: #006400;
-  font-weight: bold;
-  cursor: default;
+	background-color: #a8e063;
+	color: #006400;
+	font-weight: bold;
+	cursor: default;
 }
 
-input[readonly]:focus,
-input[readonly]:active {
-  border-color: #bdc3c7 !important;
-  box-shadow: none !important;
-  outline: none !important;
+input[readonly]:focus, input[readonly]:active {
+	border-color: #bdc3c7 !important;
+	box-shadow: none !important;
+	outline: none !important;
 }
 
-input:focus:not([readonly]),
-select:focus:not([readonly]),
-textarea:focus:not([readonly]) {
-  border-color: #3498db;
-  outline: none;
-  box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
+input:focus:not([readonly]), select:focus:not([readonly]), textarea:focus:not([readonly])
+	{
+	border-color: #3498db;
+	outline: none;
+	box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
 }
 
 input:disabled, select:disabled, textarea:disabled {
@@ -508,10 +506,10 @@ to {
 <body>
 	<div class="container">
 		<h1>勤怠登録・編集・削除</h1>
+		<div id="message-area"></div>
 		<div class="current-time">
 			画面表示した時刻: <span id="current-time">読み込み中...</span>
 		</div>
-		<div id="message-area"></div>
 		<div class="auth-header">
 			<div class="form-group">
 				<label for="employee_id">社員コード</label> <input type="text"
@@ -525,8 +523,8 @@ to {
 		</div>
 		<div class="form-group">
 			<div class="form-error" id="error-work_date"></div>
-			<label for="work_date">年月日(土日選択時に青になります)</label>
-			<input type="date" id="work_date" disabled>
+			<label for="work_date">年月日(土日選択時に青になります)</label> <input type="date"
+				id="work_date" disabled>
 			<div id="weekday-message" class="weekday-message"></div>
 			<div class="mode-instruction">
 				年月日を入力後、モードを選択してください。(選択したモード以外非表示)</div>
@@ -540,11 +538,10 @@ to {
 			<button class="mode-btn mode-delete" id="mode-delete" disabled>削除</button>
 		</div>
 		<div class="notice-box">
-			<strong>勤怠削除時、以下の項目が入力されていても無視する。</strong><br> 
-			・開始時刻 ・終了時刻 ・勤怠ステータス ・備考<br>
-			<br> 
-			開始時刻・終了時刻入力例：「09:00」(半角数字のみ入力可能、コロン自動挿入)<br>
-			<span style="color: #c82333; font-weight: bold;">登録・編集・削除可能な期間：前月1日～当月末日（今日基準）</span>
+			<strong>勤怠削除時、以下の項目が入力されていても無視する。</strong><br> ・開始時刻 ・終了時刻
+			・勤怠ステータス ・備考<br> <br>
+			開始時刻・終了時刻入力例：「09:00」(半角数字のみ入力可能、コロン自動挿入)<br> <span
+				style="color: #c82333; font-weight: bold;">登録・編集・削除可能な期間：前月1日～当月末日（今日基準）</span>
 		</div>
 		<div class="time-inputs">
 			<div class="form-group">
@@ -635,7 +632,7 @@ to {
 					<dt>備考</dt>
 					<dd id="edit-confirm-note">
 						<span id="edit-old-note"></span> ↓ <span id="edit-new-note"
-							class="edited"></span>
+							　class="edited"></span>
 					</dd>
 				</dl>
 			</div>
@@ -797,7 +794,7 @@ to {
       const currentMonthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59);
       return selectedDate >= prevMonthStart && selectedDate <= currentMonthEnd;
     }
-
+	//土日選択時
     function checkDateStyleAndMessage() {
       const val = workDateInput.value;
       workDateInput.classList.remove('saturday', 'sunday-holiday', 'error');
